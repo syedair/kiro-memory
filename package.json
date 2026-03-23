@@ -1,0 +1,29 @@
+{
+  "name": "kiro-memory",
+  "version": "1.0.0",
+  "description": "Persistent memory system for Kiro — install with npx",
+  "license": "MIT",
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "bin": {
+    "kiro-memory": "./bin/setup.mjs"
+  },
+  "files": [
+    "bin/",
+    "memory-template/",
+    "skills/"
+  ],
+  "keywords": [
+    "kiro",
+    "memory",
+    "ai",
+    "assistant",
+    "cli"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
