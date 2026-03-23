@@ -1,6 +1,6 @@
 {
   "name": "kiro-memory-skill",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Persistent memory system for Kiro — install with npx",
   "license": "MIT",
   "author": "",
