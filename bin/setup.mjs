@@ -46,7 +46,7 @@ async function main() {
   const memPath = expandHome(rawMemPath);
 
   // 2. Create memory folder + subdirs
-  const dirs = ["Work", "Technical", "Personal", "Reference", ".archive"];
+  const dirs = ["Projects", "People", "Knowledge", "Decisions", ".archive"];
   if (existsSync(memPath)) {
     console.log(yellow(`\n  ⚠ ${memPath} already exists — will copy missing template files.`));
   } else {

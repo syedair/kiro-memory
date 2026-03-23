@@ -1,16 +1,10 @@
-# Long-Term Memory
+# Memory
 
 ## Recent Context
 <!-- Auto-updated by memory skill. Timestamped entries. -->
 
-## Key Decisions
-<!-- Important decisions and their rationale -->
-
-## Ongoing Threads
+## Active Threads
 <!-- Conversations and topics in progress -->
-
-## Important References
-<!-- Links to relevant documents and resources -->
 
 ---
 *Last Updated: YYYY-MM-DD*

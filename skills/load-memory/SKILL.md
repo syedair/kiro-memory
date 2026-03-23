@@ -28,14 +28,14 @@ If the search points to specific files, read them for full context. Also read th
 
 | File | When to read |
 |------|-------------|
-| `MEMORY.md` | Always — contains recent context, key decisions, ongoing threads |
+| `MEMORY.md` | Always — recent context and active threads |
 | `USER.md` | When user preferences, role, or profile matter |
-| `Work/` | Work projects, meetings, customer engagements |
-| `Technical/` | Technical solutions, tool configs, code patterns |
-| `Personal/` | Personal notes |
-| `Reference/` | Reference materials, links, documentation |
+| `Projects/` | Project details, status, engagements |
+| `People/` | Contacts, teams, relationships |
+| `Knowledge/` | Technical solutions, tool configs, reference docs |
+| `Decisions/` | Past decisions and their rationale |
 
-Category directories may contain topic-specific markdown files (e.g., `Work/Project-Name.md`). Read those when the search or conversation points to them.
+Category directories may contain topic-specific markdown files (e.g., `Projects/Acme-Redesign.md`). Read those when the search or conversation points to them.
 
 ### Step 4: Synthesize naturally
 Weave loaded context into your response naturally — don't dump raw memory contents. Reference past decisions, ongoing threads, and user preferences as if you remember them. If you find relevant context, acknowledge it briefly (e.g., "Based on your previous work on...").

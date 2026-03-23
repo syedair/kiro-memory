@@ -1,15 +1,15 @@
 # Memory System Index
 
 ## Core Files
-- [[MEMORY.md]] - Long-term memory and context
+- [[MEMORY.md]] - Rolling context log and active threads
 - [[USER.md]] - User profile and preferences
 - [[notes.md]] - Raw notes (processing queue)
 
 ## Categories
-- [[Work/README.md]] - Work-related information
-- [[Personal/README.md]] - Personal notes and ideas
-- [[Technical/README.md]] - Technical knowledge and solutions
-- [[Reference/README.md]] - Reference materials and documentation
+- [[Projects/README.md]] - Projects and engagements
+- [[People/README.md]] - Contacts, teams, relationships
+- [[Knowledge/README.md]] - Technical solutions, tools, reference docs
+- [[Decisions/README.md]] - Decision log with rationale
 
 ---
 *Last Updated: YYYY-MM-DD*

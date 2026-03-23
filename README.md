@@ -34,7 +34,7 @@ After that, just follow the on-screen next steps to index the folder and optiona
 #### 1. Create the memory folder
 
 ```bash
-mkdir -p ~/Memory/{Work,Technical,Personal,Reference,.archive}
+mkdir -p ~/Memory/{Projects,People,Knowledge,Decisions,.archive}
 ```
 
 #### 2. Initialize the memory files
@@ -127,18 +127,16 @@ kiro-cli chat --agent <name-of-your-agent> --trust-all-tools
 ```
 ~/Memory/
 ├── README.md              # Index of all files
-├── MEMORY.md              # Long-term memory — recent context, decisions, ongoing threads
+├── MEMORY.md              # Rolling context log — recent activity, active threads
 ├── USER.md                # Your profile, preferences, role
 ├── notes.md               # Raw notes drop zone (processed by update-memory)
-├── Work/                  # Work projects, customers, meetings
-│   ├── README.md          # Summary table of active engagements
-│   ├── Customer-Project.md  # One file per engagement
-│   └── ...
-├── Technical/             # Technical solutions, configs, patterns
+├── Projects/              # One file per project or engagement
+│   └── README.md          # Active projects index
+├── People/                # One file per person or team
+│   └── README.md          # Contacts index
+├── Knowledge/             # Technical solutions, tools, reference docs
 │   └── README.md
-├── Personal/              # Personal notes
-│   └── README.md
-├── Reference/             # Links, docs, reference materials
+├── Decisions/             # Decision log with rationale
 │   └── README.md
 └── .archive/              # Processed notes archive
     └── YYYY-MM-DD-notes.md
@@ -148,11 +146,14 @@ kiro-cli chat --agent <name-of-your-agent> --trust-all-tools
 
 | File | Purpose |
 |------|---------|
-| `MEMORY.md` | Always updated — timestamped recent context, key decisions, ongoing threads |
+| `MEMORY.md` | Rolling context — recent activity and active threads |
 | `USER.md` | Your profile — name, role, timezone, preferences |
 | `notes.md` | Drop raw notes here — the skill processes and distributes them |
-| `Work/README.md` | Summary table of active projects/engagements with links |
-| `Work/<Name>.md` | Detailed file per project/customer/engagement |
+| `Projects/README.md` | Active projects index with status |
+| `Projects/<Name>.md` | Detailed file per project or engagement |
+| `People/README.md` | Contacts, teams, and relationships |
+| `Knowledge/README.md` | Technical solutions, tool configs, reference links |
+| `Decisions/README.md` | Decision log with rationale and related context |
 
 ### Conventions
 

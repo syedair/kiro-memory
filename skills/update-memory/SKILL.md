@@ -34,18 +34,18 @@ Decide which files to update based on the content:
 |----------|---------------|----------------|
 | Recent context | `MEMORY.md` | Always update — add timestamped entries under "Recent Context" |
 | User profile | `USER.md` | Preferences, role changes, personal details |
-| Work | `Work/` | Projects, meetings, customer engagements, work decisions |
-| Technical | `Technical/` | Solutions, tool configs, code patterns, technical learnings |
-| Personal | `Personal/` | Personal notes, non-work items |
-| Reference | `Reference/` | Links, documentation, reference materials |
+| Projects | `Projects/` | Project details, status updates, engagements |
+| People | `People/` | Contacts, teams, roles, relationships |
+| Knowledge | `Knowledge/` | Technical solutions, tool configs, reference docs, links |
+| Decisions | `Decisions/` | Decisions with rationale and related context |
 
-For category directories: use `README.md` for general/short entries, or create a dedicated file for substantial topics (e.g., `Work/Project-Name.md`).
+For category directories: use `README.md` for general/short entries, or create a dedicated file for substantial topics (e.g., `Projects/Acme-Redesign.md`, `People/Jane-Smith.md`).
 
 ### 3. Update files
 When writing updates:
 
 - **Add, don't replace** — append new information under the appropriate section. Only modify existing entries if correcting or updating them.
-- **Use bidirectional links** — reference related files with `[[filename]]` syntax (e.g., `[[Work/Project-Name.md]]`).
+- **Use bidirectional links** — reference related files with `[[filename]]` syntax (e.g., `[[Projects/Acme-Redesign.md]]`).
 - **Timestamp entries** — prefix with date: `- YYYY-MM-DD: <content>`.
 - **Deduplicate** — search existing content first (via `knowledge search` on "My Memory" KB or by reading the target file). Don't add information that's already captured. Update existing entries if the new info refines or supersedes them.
 - **Keep entries concise** — capture the essence, not the full conversation transcript.
@@ -72,4 +72,4 @@ knowledge update --path "<MEMORY_PATH>" --name "My Memory"
 ```
 
 ### 6. Confirm to the user
-Briefly tell the user what you saved and where. Keep it short — e.g., "Saved the project meeting notes to Work/ and updated MEMORY.md with the key decisions."
+Briefly tell the user what you saved and where. Keep it short — e.g., "Saved the project details to Projects/ and logged the architecture decision in Decisions/."
