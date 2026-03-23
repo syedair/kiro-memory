@@ -15,7 +15,7 @@ All memory is stored as plain markdown files in a folder you control, indexed vi
 ### Quick Install (recommended)
 
 ```bash
-npx kiro-memory
+npx kiro-memory-skill
 ```
 
 This will walk you through:
