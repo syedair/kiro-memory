@@ -1,5 +1,5 @@
 {
-  "name": "kiro-memory",
+  "name": "kiro-memory-skill",
   "version": "1.0.0",
   "description": "Persistent memory system for Kiro — install with npx",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "url": ""
   },
   "bin": {
-    "kiro-memory": "./bin/setup.mjs"
+    "kiro-memory-skill": "./bin/setup.mjs"
   },
   "files": [
     "bin/",
