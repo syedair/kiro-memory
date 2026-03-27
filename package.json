@@ -1,7 +1,7 @@
 {
   "name": "kiro-memory-skill",
-  "version": "1.1.1",
-  "description": "Persistent memory system for Kiro — install with npx",
+  "version": "2.0.0",
+  "description": "Persistent memory system for Kiro with dream consolidation — install with npx",
   "license": "MIT",
   "author": "",
   "repository": {
@@ -13,6 +13,7 @@
   },
   "files": [
     "bin/",
+    "hooks/",
     "memory-template/",
     "skills/"
   ],
@@ -21,7 +22,9 @@
     "memory",
     "ai",
     "assistant",
-    "cli"
+    "cli",
+    "dream",
+    "consolidation"
   ],
   "engines": {
     "node": ">=18"
