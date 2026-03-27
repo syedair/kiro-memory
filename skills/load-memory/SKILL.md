@@ -47,6 +47,11 @@ Weave what you found into your response as if you remember it. Reference past de
 **Good:** "Since you switched to Fastify last month, you'll want to update the route handlers..."
 **Bad:** "According to my memory files, on 2026-03-15 you decided to use Fastify."
 
+If memory entries contain relative dates like "yesterday" or "last week," don't repeat them verbatim — they were written at a different time and are likely stale. Use the absolute timestamps from the entries instead, or phrase things relative to today's date.
+
+**Bad:** "You fixed the auth bug last week" (repeating a stale relative date from the file)
+**Good:** "You fixed the auth bug around March 21st" (using the actual timestamp)
+
 If the knowledge base search returns nothing useful, fall back to reading `MEMORY.md` directly — it always has the most recent context.
 
 Don't tell the user you're "loading memory" or "searching the knowledge base." The magic is in the seamlessness.

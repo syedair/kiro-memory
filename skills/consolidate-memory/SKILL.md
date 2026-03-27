@@ -37,7 +37,20 @@ Scan for these problems across all files:
 Fix each issue at the source:
 
 - **Prune** stale entries — remove them entirely. If an entire file becomes empty after pruning, delete the file and remove its link from the parent README.md.
-- **Resolve contradictions** — newer information wins. When genuinely uncertain, keep both with a brief note: `<!-- Conflict: verify with user whether Express or Fastify is current -->`.
+- **Resolve contradictions** — newer information wins. When genuinely uncertain, keep both with a brief note: `<!-- Conflict: verify with user whether Express or Fastify is current -->`. Contradictions aren't just between files — they also happen within a single file. A decision log might say "Chose Express" on one date and "Switched to Fastify" on a later date. When a later entry supersedes an earlier one, annotate the original so readers understand the timeline:
+
+  **Before:**
+  ```
+  - 2026-03-20: Chose Express as the framework
+  - 2026-03-26: Switched to Fastify for better performance
+  ```
+  **After:**
+  ```
+  - 2026-03-20: Chose Express as the framework (superseded — migrated to Fastify 2026-03-26)
+  - 2026-03-26: Switched to Fastify for better performance
+  ```
+
+  This preserves the decision history (useful context for understanding why things changed) while making it immediately clear what's current. Don't just delete the old entry — the rationale behind the original choice can still be valuable.
 - **Convert dates** — replace relative with absolute.
 
   **Before:** `- yesterday: Decided to use Fastify`
