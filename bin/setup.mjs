@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createInterface } from "node:readline";
-import { existsSync, mkdirSync, cpSync, readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, mkdirSync, cpSync, readFileSync, writeFileSync, readdirSync, statSync, chmodSync } from "node:fs";
 import { resolve, join, dirname } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -25,7 +25,7 @@ function dim(s) { return `\x1b[2m${s}\x1b[0m`; }
 async function main() {
   console.log();
   console.log(cyan("  Kiro Memory — Setup"));
-  console.log(dim("  Persistent memory for your Kiro assistant\n"));
+  console.log(dim("  Persistent memory with dream consolidation\n"));
 
   // 0. Check for kiro-cli
   try {
@@ -66,7 +66,7 @@ async function main() {
   const kiroSkillsDir = expandHome("~/.kiro/skills");
   mkdirSync(kiroSkillsDir, { recursive: true });
 
-  const skills = ["load-memory", "update-memory"];
+  const skills = ["load-memory", "update-memory", "consolidate-memory"];
   const srcSkillsDir = join(pkgRoot, "skills");
 
   for (const skill of skills) {
@@ -87,13 +87,27 @@ async function main() {
   }
   console.log(green("  ✓ Skills installed to ") + kiroSkillsDir + dim(` (memory path: ${rawMemPath})`));
 
-  // 5. Knowledge base index type
+  // 5. Install hooks
+  const hooksDir = expandHome("~/.kiro/memory-hooks");
+  mkdirSync(hooksDir, { recursive: true });
+
+  const srcHooksDir = join(pkgRoot, "hooks");
+  for (const hookFile of readdirSync(srcHooksDir)) {
+    const src = join(srcHooksDir, hookFile);
+    const dest = join(hooksDir, hookFile);
+    const content = readFileSync(src, "utf-8");
+    writeFileSync(dest, content.replace(/<MEMORY_PATH>/g, expandHome(rawMemPath)));
+    chmodSync(dest, 0o755);
+  }
+  console.log(green("  ✓ Hooks installed to ") + hooksDir);
+
+  // 6. Knowledge base index type
   console.log();
   console.log(`  Knowledge Base index type:`);
   console.log(dim(`    1) Fast (Lexical — bm25)`));
   console.log(dim(`    2) Best (Semantic — all-minilm-l6-v2)`));
   const indexChoice = (await ask(`  Choose index type ${dim("(1/2, default: 2)")}: `)).trim() || "2";
-  const indexType = indexChoice === "1" ? "Fast" : "Best";
+  const indexType = indexChoice === "1" ? "fast" : "best";
 
   const cliSettingsPath = expandHome("~/.kiro/settings/cli.json");
   let cliSettings = {};
@@ -102,11 +116,11 @@ async function main() {
   } else {
     mkdirSync(dirname(cliSettingsPath), { recursive: true });
   }
-  cliSettings["knowledge.indexType"] = indexType;
+  cliSettings["knowledge.indexType"] = indexType === "fast" ? "Fast" : "Best";
   writeFileSync(cliSettingsPath, JSON.stringify(cliSettings, null, 2) + "\n");
   console.log(green(`  ✓ Index type set to ${indexType}`));
 
-  // 6. Create agent
+  // 7. Create agent
   const agentName = (await ask(`\n  Agent name ${dim("(mnemo)")}: `)).trim() || "mnemo";
   const agentsDir = expandHome("~/.kiro/agents");
   mkdirSync(agentsDir, { recursive: true });
@@ -119,28 +133,29 @@ async function main() {
     if (overwrite !== "y") {
       console.log(dim(`  Skipped agent creation`));
     } else {
-      writeAgentConfig(agentFile, agentName);
+      writeAgentConfig(agentFile, agentName, hooksDir, rawMemPath, indexType);
     }
   } else {
-    writeAgentConfig(agentFile, agentName);
+    writeAgentConfig(agentFile, agentName, hooksDir, rawMemPath, indexType);
   }
 
-  // 7. Done
+  // 8. Done
   console.log();
   console.log(cyan("  All set! Start chatting:"));
   console.log(dim(`  kiro-cli chat --agent ${agentName} --trust-all-tools`));
   console.log();
   console.log(cyan("  Try it out:"));
   console.log(dim(`  Ask: I am <Your Name>, remember`));
+  console.log(dim(`  Ask: dream  (to consolidate memory)`));
   console.log();
 
   rl.close();
 }
 
-function writeAgentConfig(filePath, name) {
+function writeAgentConfig(filePath, name, hooksDir, memPath, indexType) {
   const config = {
     name,
-    description: "Kiro Memory — persistent context across sessions",
+    description: "Kiro Memory — persistent context with dream consolidation",
     prompt: null,
     mcpServers: {},
     tools: ["*"],
@@ -148,9 +163,25 @@ function writeAgentConfig(filePath, name) {
     allowedTools: [],
     resources: [
       "skill://~/.kiro/skills/load-memory/SKILL.md",
-      "skill://~/.kiro/skills/update-memory/SKILL.md"
+      "skill://~/.kiro/skills/update-memory/SKILL.md",
+      "skill://~/.kiro/skills/consolidate-memory/SKILL.md",
+      {
+        type: "knowledgeBase",
+        source: `file://${memPath}`,
+        name: "My Memory",
+        description: "User's persistent memory system — projects, people, decisions, knowledge",
+        indexType,
+        autoUpdate: true
+      }
     ],
-    hooks: {},
+    hooks: {
+      agentSpawn: [
+        { command: `bash ${hooksDir}/agent-spawn.sh` }
+      ],
+      stop: [
+        { command: `bash ${hooksDir}/stop.sh` }
+      ]
+    },
     toolsSettings: {},
     includeMcpJson: false,
     model: null
