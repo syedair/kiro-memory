@@ -1,6 +1,6 @@
 ---
 name: load-memory
-description: Load relevant context from the memory system based on user's current topic or question. Use when starting a new conversation, when user asks about past context, references previous work, mentions a project or person by name, or when background knowledge would improve your response. Also use when user says "what do you remember", "load context", or "check memory". Trigger this proactively whenever prior context would help — don't wait for the user to ask.
+description: Load relevant context from the memory system based on user's current topic or question. Use when starting a new conversation, when user asks about past context, references previous work, mentions a project or person by name, or when background knowledge would improve your response. Also use when user says "what do you remember", "load context", or "check memory". Trigger this proactively whenever prior context would help — don't wait for the user to ask. Even if the user hasn't explicitly asked for memory, use this skill whenever you suspect knowing their history, preferences, past decisions, or project context would make your response better. Err on the side of loading context — it's cheap and the user benefits from continuity.
 ---
 
 # Load Memory Skill
@@ -8,39 +8,45 @@ description: Load relevant context from the memory system based on user's curren
 ## Purpose
 Retrieve relevant information from the memory system so you can respond with full context about the user, their projects, preferences, and past decisions.
 
+The goal is continuity — the user should feel like you genuinely remember them across sessions, not like they're starting fresh every time. This means weaving context in naturally, not announcing that you "loaded" anything.
+
 ## Memory System Location
 `<MEMORY_PATH>`
 
 ## How to Load Context
 
-### Step 1: Always read MEMORY.md for temporal/general queries
-If the user asks about "recent" activity, "what's going on", "what have I been working on", or anything time-based, read `MEMORY.md` directly first — it has timestamped recent context that semantic search often misses.
+### Step 1: Read MEMORY.md first for temporal queries
+Start here for anything time-related — "what have I been working on", "what's going on", "recently". MEMORY.md has timestamped entries that semantic search often ranks poorly because the keywords don't match the query well.
 
 ### Step 2: Search the knowledge base
-Use the `knowledge` tool to search for relevant content across all knowledge bases. If you need to target "My Memory" specifically, run `knowledge show` first to get the current context ID.
+Use the `knowledge` tool to find relevant content by topic. This catches things spread across multiple files that you wouldn't know to look for.
 
 ```
 knowledge search --query "<topic keywords>"
 ```
 
-### Step 3: Read specific files based on results
-If the search points to specific files, read them for full context. Also read these files when broadly relevant:
+If you need to target the memory knowledge base specifically, run `knowledge show` first to get the context ID.
 
-| File | When to read |
-|------|-------------|
-| `MEMORY.md` | Always — recent context and active threads |
-| `USER.md` | When user preferences, role, or profile matter |
-| `Projects/` | Project details, status, engagements |
-| `People/` | Contacts, teams, relationships |
-| `Knowledge/` | Technical solutions, tool configs, reference docs |
-| `Decisions/` | Past decisions and their rationale |
+### Step 3: Read specific files for depth
+Search results point you to files — read the ones that matter. Use this as a guide for when each file is worth reading:
 
-Category directories may contain topic-specific markdown files (e.g., `Projects/Acme-Redesign.md`). Read those when the search or conversation points to them.
+| File | When it helps |
+|------|--------------|
+| `MEMORY.md` | Almost always — recent context and active threads |
+| `USER.md` | When preferences, role, communication style, or timezone matter |
+| `Projects/` | When the conversation touches on any project or engagement |
+| `People/` | When names, teams, or relationships come up |
+| `Knowledge/` | When technical solutions, tool configs, or reference material is relevant |
+| `Decisions/` | When past choices or their rationale would inform the current discussion |
+
+Category directories often contain topic-specific files (e.g., `Projects/Acme-Redesign.md`). Follow `[[links]]` between files when you need deeper context on a referenced topic — the memory system uses bidirectional links for exactly this purpose.
 
 ### Step 4: Synthesize naturally
-Weave loaded context into your response naturally — don't dump raw memory contents. Reference past decisions, ongoing threads, and user preferences as if you remember them. If you find relevant context, acknowledge it briefly (e.g., "Based on your previous work on...").
+Weave what you found into your response as if you remember it. Reference past decisions, ongoing threads, and preferences conversationally.
 
-## Important Notes
-- The memory system uses bidirectional `[[links]]` between files — follow these links when you need deeper context on a referenced topic.
-- If the knowledge base search returns nothing useful, fall back to reading `MEMORY.md` directly — it has the most recent context.
-- Don't tell the user you're "loading memory" or "searching the knowledge base" — just use the context seamlessly.
+**Good:** "Since you switched to Fastify last month, you'll want to update the route handlers..."
+**Bad:** "According to my memory files, on 2026-03-15 you decided to use Fastify."
+
+If the knowledge base search returns nothing useful, fall back to reading `MEMORY.md` directly — it always has the most recent context.
+
+Don't tell the user you're "loading memory" or "searching the knowledge base." The magic is in the seamlessness.

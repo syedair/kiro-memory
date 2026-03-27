@@ -1,0 +1,23 @@
+{
+  "skill_name": "kiro-memory-skills",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "dream",
+      "expected_output": "Should trigger consolidate-memory skill. Should read all memory files, identify issues (stale entries, contradictions, relative dates, duplicates), fix them, update MEMORY.md index, re-index knowledge base, stamp .last-dream, reset .session-count, and report what changed.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I just got promoted to Senior Engineer at Acme Corp, remember that. Also my team lead is now Sarah Chen.",
+      "expected_output": "Should trigger update-memory skill. Should update USER.md with new role, create or update People/Sarah-Chen.md, update Projects/ if Acme Corp project exists, add timestamped entry to MEMORY.md, use [[links]] between files, and re-index.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "what have I been working on lately?",
+      "expected_output": "Should trigger load-memory skill. Should read MEMORY.md first (temporal query), search knowledge base for recent activity, synthesize naturally without saying 'I loaded your memory', reference specific projects and decisions from memory files.",
+      "files": []
+    }
+  ]
+}
