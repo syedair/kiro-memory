@@ -1,6 +1,6 @@
 {
   "name": "kiro-memory-skill",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Persistent memory system for Kiro with dream consolidation — install with npx",
   "license": "MIT",
   "author": "",

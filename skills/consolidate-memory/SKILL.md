@@ -34,6 +34,10 @@ Scan for these problems across all files:
 - **Duplicates** — same information repeated across multiple files. Common when the user mentions the same thing in different conversations.
 - **Orphaned links** — `[[links]]` pointing to files that don't exist.
 - **Oversized files** — any single file over 200 lines should be split or trimmed. Large files are harder to search and slower to load.
+- **Misplaced content** — files or folders outside the expected structure. This can happen after upgrades (e.g., a top-level `Projects/` from an older version) or when files get dropped in the wrong place. The expected structure is:
+  - Core files in root: `SOUL.md`, `AGENT.md`, `USER.md`, `MEMORY.md`, `notes.md`
+  - Category folders: `Customers/`, `Personal/`, `Personal/Projects/`, `People/`, `Knowledge/`, `Decisions/`, `Reference/`, `Technical/`, `Work/`, `.archive/`
+  - Anything else in the root or in unexpected locations is a candidate for relocation.
 
 ### Phase 3: Consolidate
 Fix each issue at the source:
@@ -61,6 +65,12 @@ Fix each issue at the source:
 - **Deduplicate** — merge overlapping entries into the most appropriate file. Keep the richer version, discard the thinner one.
 - **Fix links** — remove broken `[[links]]`, add missing ones where files clearly reference each other.
 - **Split large files** — if a category README.md has grown too large, extract topics into dedicated files (e.g., `Customers/Acme/Redesign.md`) and leave a link in the README.
+- **Relocate misplaced content** — move files and folders into the correct location based on their content:
+  - A top-level `Projects/` folder (from older versions) → move contents into `Personal/Projects/`
+  - Customer-related files in `Projects/` → move to `Customers/<Company>/`
+  - Random markdown files in the root → read them, categorize, and move to the right folder
+  - After relocating, update any `[[links]]` that referenced the old path
+  - Tell the user what was moved and why in the Phase 6 report
 
 ### Phase 4: Prune and Index
 Update `MEMORY.md` to reflect the current state:
@@ -99,6 +109,7 @@ Consolidated memory:
 - Resolved Express/Fastify contradiction in Knowledge/README.md (kept Fastify)
 - Converted 7 relative dates to absolute
 - Deduplicated 2 entries between MEMORY.md and Decisions/README.md
+- Relocated Projects/Acme-Redesign.md → Customers/Acme/Redesign.md
 - MEMORY.md: 187 → 142 lines
 ```
 
