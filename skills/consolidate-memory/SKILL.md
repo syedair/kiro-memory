@@ -18,10 +18,12 @@ Without periodic consolidation, memory files accumulate noise: contradictory ent
 ### Phase 1: Orient
 Read the full memory directory to understand current state. This prevents creating duplicates or missing context during consolidation.
 
-1. Read `MEMORY.md` — the index and recent context
-2. Read `USER.md` — user profile
-3. List and skim all files in `Projects/`, `People/`, `Knowledge/`, `Decisions/`
-4. Note file sizes, last-updated dates, and cross-references
+1. Read `SOUL.md` — agent identity and principles
+2. Read `AGENT.md` — behavioral rules and communication style
+3. Read `MEMORY.md` — the index and recent context
+4. Read `USER.md` — user profile
+5. List and skim all files in `Personal/`, `Personal/Projects/`, `People/`, `Knowledge/`, `Decisions/`, `Customers/`, `Reference/`, `Technical/`, `Work/`
+6. Note file sizes, last-updated dates, and cross-references
 
 ### Phase 2: Identify Issues
 Scan for these problems across all files:
@@ -58,7 +60,7 @@ Fix each issue at the source:
 
 - **Deduplicate** — merge overlapping entries into the most appropriate file. Keep the richer version, discard the thinner one.
 - **Fix links** — remove broken `[[links]]`, add missing ones where files clearly reference each other.
-- **Split large files** — if a category README.md has grown too large, extract topics into dedicated files (e.g., `Projects/Acme.md`) and leave a link in the README.
+- **Split large files** — if a category README.md has grown too large, extract topics into dedicated files (e.g., `Customers/Acme/Redesign.md`) and leave a link in the README.
 
 ### Phase 4: Prune and Index
 Update `MEMORY.md` to reflect the current state:
@@ -93,7 +95,7 @@ Tell the user what changed. Be specific and brief:
 **Example report:**
 ```
 Consolidated memory:
-- Pruned 3 stale project entries from Projects/README.md
+- Pruned 3 stale project entries from Personal/Projects/README.md
 - Resolved Express/Fastify contradiction in Knowledge/README.md (kept Fastify)
 - Converted 7 relative dates to absolute
 - Deduplicated 2 entries between MEMORY.md and Decisions/README.md

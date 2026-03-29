@@ -45,7 +45,7 @@ This walks you through:
 #### 1. Create the memory folder
 
 ```bash
-mkdir -p ~/Memory/{Projects,People,Knowledge,Decisions,.archive}
+mkdir -p ~/Memory/{People,Knowledge,Decisions,Customers,Personal,Personal/Projects,Reference,Technical,Work,.archive}
 ```
 
 #### 2. Initialize the memory files
@@ -126,15 +126,24 @@ kiro-cli chat --agent mnemo --trust-all-tools
 ```
 ~/Memory/
 ├── README.md              # Index of all files
+├── SOUL.md                # Agent's core identity, purpose, and principles
+├── AGENT.md               # Agent's behavioral rules and communication style
 ├── MEMORY.md              # Rolling context log — recent activity, active threads
 ├── USER.md                # Your profile, preferences, role
 ├── notes.md               # Raw notes drop zone (processed by update-memory)
 ├── .last-dream            # Timestamp of last consolidation (managed by hooks)
 ├── .session-count         # Session counter (managed by hooks)
-├── Projects/              # One file per project or engagement
+├── Personal/              # Life, interests, goals, habits
+│   └── Projects/          #   Personal, internal, org-level projects
 ├── People/                # One file per person or team
 ├── Knowledge/             # Technical solutions, tools, reference docs
 ├── Decisions/             # Decision log with rationale
+├── Customers/             # One subdirectory per customer company
+│   └── <Company>/         #   README.md = company overview, plus engagement files
+├── Personal/              # Life, interests, goals, habits
+├── Reference/             # Links, articles, bookmarks, resources
+├── Technical/             # Code snippets, configs, architecture notes
+├── Work/                  # Meetings, processes, team dynamics, org context
 └── .archive/              # Processed notes and consolidation archives
 ```
 

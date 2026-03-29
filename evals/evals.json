@@ -10,7 +10,7 @@
     {
       "id": 2,
       "prompt": "I just got promoted to Senior Engineer at Acme Corp, remember that. Also my team lead is now Sarah Chen.",
-      "expected_output": "Should trigger update-memory skill. Should update USER.md with new role, create or update People/Sarah-Chen.md, update Projects/ if Acme Corp project exists, add timestamped entry to MEMORY.md, use [[links]] between files, and re-index.",
+      "expected_output": "Should trigger update-memory skill. Should update USER.md with new role, create or update People/Sarah-Chen.md, update Customers/Acme-Corp/ if customer exists or Personal/Projects/ for org-level work, add timestamped entry to MEMORY.md, use [[links]] between files, and re-index.",
       "files": []
     },
     {

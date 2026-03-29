@@ -32,14 +32,20 @@ Search results point you to files — read the ones that matter. Use this as a g
 
 | File | When it helps |
 |------|--------------|
-| `MEMORY.md` | Almost always — recent context and active threads |
+| `SOUL.md` | Always — loaded at startup, defines who the agent is |
+| `AGENT.md` | Always — loaded at startup, defines how the agent behaves |
 | `USER.md` | When preferences, role, communication style, or timezone matter |
-| `Projects/` | When the conversation touches on any project or engagement |
+| `MEMORY.md` | Almost always — recent context and active threads |
+| `Personal/` | Life, interests, goals, hobbies, habits, and personal projects (`Personal/Projects/`) |
 | `People/` | When names, teams, or relationships come up |
 | `Knowledge/` | When technical solutions, tool configs, or reference material is relevant |
 | `Decisions/` | When past choices or their rationale would inform the current discussion |
+| `Customers/` | When customer companies, accounts, or client engagements come up. Check `Customers/<Company>/README.md` for overview and engagement files within the same directory for details |
+| `Reference/` | When looking for saved links, articles, or bookmarks |
+| `Technical/` | When code snippets, configs, or architecture notes are relevant |
+| `Work/` | When meetings, processes, or org context matter |
 
-Category directories often contain topic-specific files (e.g., `Projects/Acme-Redesign.md`). Follow `[[links]]` between files when you need deeper context on a referenced topic — the memory system uses bidirectional links for exactly this purpose.
+Category directories often contain topic-specific files (e.g., `Customers/Acme/Redesign.md`). Follow `[[links]]` between files when you need deeper context on a referenced topic — the memory system uses bidirectional links for exactly this purpose.
 
 ### Step 4: Synthesize naturally
 Weave what you found into your response as if you remember it. Reference past decisions, ongoing threads, and preferences conversationally.

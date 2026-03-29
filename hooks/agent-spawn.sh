@@ -1,18 +1,26 @@
 #!/usr/bin/env bash
-# agentSpawn hook: loads MEMORY.md into context and checks consolidation staleness
+# agentSpawn hook: loads core identity files into context and checks consolidation staleness
 # STDOUT is injected into the agent's context automatically by Kiro
 
 MEMORY_PATH="<MEMORY_PATH>"
 MEMORY_FILE="$MEMORY_PATH/MEMORY.md"
+SOUL_FILE="$MEMORY_PATH/SOUL.md"
+AGENT_FILE="$MEMORY_PATH/AGENT.md"
+USER_FILE="$MEMORY_PATH/USER.md"
 DREAM_FILE="$MEMORY_PATH/.last-dream"
 SESSION_FILE="$MEMORY_PATH/.session-count"
 
-# Load MEMORY.md into context
-if [ -f "$MEMORY_FILE" ]; then
-  echo "=== Memory Context (auto-loaded) ==="
-  head -200 "$MEMORY_FILE"
-  echo "=== End Memory Context ==="
-fi
+# Load core files into context
+for label_file in "Soul:$SOUL_FILE" "Agent:$AGENT_FILE" "User:$USER_FILE" "Memory:$MEMORY_FILE"; do
+  label="${label_file%%:*}"
+  file="${label_file#*:}"
+  if [ -f "$file" ]; then
+    echo "=== ${label} Context (auto-loaded) ==="
+    head -200 "$file"
+    echo "=== End ${label} Context ==="
+    echo ""
+  fi
+done
 
 # Increment session counter
 count=0

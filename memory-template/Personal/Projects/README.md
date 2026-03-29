@@ -1,7 +1,7 @@
 # Projects
 
 ## Active Projects
-<!-- One file per project, linked from here -->
+<!-- Personal, internal, and org-level projects — one file per project -->
 
 | Project | Description | Status |
 |---------|-------------|--------|
