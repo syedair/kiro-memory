@@ -33,7 +33,7 @@ Scan for these problems across all files:
 - **Relative dates** — "yesterday", "last week", "recently" that have lost meaning. These are fine when first written but become confusing after a few days. Convert them using the current date and the file's context.
 - **Duplicates** — same information repeated across multiple files. Common when the user mentions the same thing in different conversations.
 - **Orphaned links** — `[[links]]` pointing to files that don't exist.
-- **Oversized files** — any single file over 200 lines should be split or trimmed. Large files are harder to search and slower to load.
+- **Oversized files** — any single file over 1000 lines should be split or trimmed. Large files are harder to search and slower to load.
 - **Misplaced content** — files or folders outside the expected structure. This can happen after upgrades (e.g., a top-level `Projects/` from an older version) or when files get dropped in the wrong place. The expected structure is:
   - Core files in root: `SOUL.md`, `AGENT.md`, `USER.md`, `MEMORY.md`, `notes.md`
   - Category folders: `Customers/`, `Personal/`, `Personal/Projects/`, `People/`, `Knowledge/`, `Decisions/`, `Reference/`, `Technical/`, `Work/`, `.archive/`
@@ -42,6 +42,7 @@ Scan for these problems across all files:
 ### Phase 3: Consolidate
 Fix each issue at the source:
 
+- **Preserve before pruning** — before removing any stale entry, verify the information exists in the appropriate category sub-folder (`Personal/`, `Personal/Projects/`, `People/`, `Knowledge/`, `Decisions/`, `Customers/`, `Reference/`, `Technical/`, `Work/`). If it doesn't, create or update the corresponding file there first. For example, a stale project entry in MEMORY.md should have a corresponding file under `Personal/Projects/` before it's removed from the index. Customer-related info goes under `Customers/<Company>/`, technical notes under `Technical/`, etc. Only after confirming the detail is preserved in the right place should you prune it from the source.
 - **Prune** stale entries — remove them entirely. If an entire file becomes empty after pruning, delete the file and remove its link from the parent README.md.
 - **Resolve contradictions** — newer information wins. When genuinely uncertain, keep both with a brief note: `<!-- Conflict: verify with user whether Express or Fastify is current -->`. Contradictions aren't just between files — they also happen within a single file. A decision log might say "Chose Express" on one date and "Switched to Fastify" on a later date. When a later entry supersedes an earlier one, annotate the original so readers understand the timeline:
 
@@ -74,7 +75,7 @@ Fix each issue at the source:
 
 ### Phase 4: Prune and Index
 Update `MEMORY.md` to reflect the current state:
-1. Keep it under 200 lines — it's an index and recent-context log, not a dump. The agentSpawn hook loads this file into context at startup, so keeping it lean means faster, cleaner session starts.
+1. Keep it under 1000 lines — it's an index and recent-context log, not a dump. The agentSpawn hook loads this file into context at startup, so keeping it lean means faster, cleaner session starts.
 2. Remove pointers to deleted files.
 3. Add pointers to new files created during consolidation.
 4. Archive "Recent Context" entries older than 30 days to `.archive/YYYY-MM-DD-consolidation.md`. These aren't lost — they're still searchable via the knowledge base — but they don't need to take up space in the active index.
