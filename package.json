@@ -1,7 +1,7 @@
 {
   "name": "kiro-memory-skill",
-  "version": "3.2.1",
-  "description": "Persistent memory system for Kiro with dream consolidation — install with npx",
+  "version": "3.3.0",
+  "description": "Persistent memory system for AI assistants — supports Kiro and Claude Code",
   "license": "MIT",
   "author": "",
   "repository": {
@@ -9,16 +9,20 @@
     "url": "https://github.com/syedair/kiro-memory"
   },
   "bin": {
-    "kiro-memory-skill": "./bin/setup.mjs"
+    "kiro-memory-skill": "./bin/setup.mjs",
+    "ai-memory-skill": "./bin/setup.mjs"
   },
   "files": [
     "bin/",
     "hooks/",
     "memory-template/",
-    "skills/"
+    "skills/",
+    "claude-skills/"
   ],
   "keywords": [
     "kiro",
+    "claude",
+    "claude-code",
     "memory",
     "ai",
     "assistant",

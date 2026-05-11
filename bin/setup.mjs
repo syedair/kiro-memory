@@ -146,20 +146,30 @@ function copyDirSkipExisting(src, dest) {
 
 async function main() {
   console.log();
-  console.log(cyan("  Kiro Memory — Setup"));
+  console.log(cyan("  AI Memory — Setup"));
   console.log(dim(`  v${PKG_VERSION} — Persistent memory with dream consolidation\n`));
 
-  // 0. Check for kiro-cli
-  try {
-    execSync("which kiro-cli", { stdio: "ignore" });
-  } catch {
-    console.log(yellow("  ⚠ kiro-cli not found on your PATH."));
-    console.log(`  Install it from: ${cyan("https://kiro.dev/docs/cli/install")}`);
-    const cont = (await ask(`\n  Continue anyway? ${dim("(y/N)")}: `)).trim().toLowerCase();
-    if (cont !== "y") {
-      console.log(dim("\n  Setup cancelled. Install kiro-cli and try again.\n"));
-      rl.close();
-      return;
+  // 0. Which AI tool?
+  console.log(`  Which AI tool are you setting up for?`);
+  console.log(dim(`    1) Kiro`));
+  console.log(dim(`    2) Claude Code`));
+  console.log(dim(`    3) Both`));
+  const toolChoice = (await ask(`  Choose ${dim("(1/2/3, default: 2)")}: `)).trim() || "2";
+  const installKiro = toolChoice === "1" || toolChoice === "3";
+  const installClaude = toolChoice === "2" || toolChoice === "3";
+
+  if (installKiro) {
+    try {
+      execSync("which kiro-cli", { stdio: "ignore" });
+    } catch {
+      console.log(yellow("\n  ⚠ kiro-cli not found on your PATH."));
+      console.log(`  Install it from: ${cyan("https://kiro.dev/docs/cli/install")}`);
+      const cont = (await ask(`\n  Continue anyway? ${dim("(y/N)")}: `)).trim().toLowerCase();
+      if (cont !== "y") {
+        console.log(dim("\n  Setup cancelled. Install kiro-cli and try again.\n"));
+        rl.close();
+        return;
+      }
     }
   }
 
@@ -198,89 +208,159 @@ async function main() {
   }
   console.log(green("  ✓ Memory folder ready at ") + memPath);
 
-  // 4. Install skills (always overwrite — skills are managed, not customized)
-  const kiroSkillsDir = expandHome("~/.kiro/skills");
-  mkdirSync(kiroSkillsDir, { recursive: true });
+  // ── KIRO INSTALL ────────────────────────────────────────────────────────────
+  let hooksDir;
+  if (installKiro) {
+    // 4. Install skills (always overwrite — skills are managed, not customized)
+    const kiroSkillsDir = expandHome("~/.kiro/skills");
+    mkdirSync(kiroSkillsDir, { recursive: true });
 
-  const skills = ["load-memory", "update-memory", "consolidate-memory"];
-  const srcSkillsDir = join(pkgRoot, "skills");
+    const skills = ["load-memory", "update-memory", "consolidate-memory"];
+    const srcSkillsDir = join(pkgRoot, "skills");
 
-  for (const skill of skills) {
-    const dest = join(kiroSkillsDir, skill);
-    cpSync(join(srcSkillsDir, skill), dest, { recursive: true, force: true });
+    for (const skill of skills) {
+      const dest = join(kiroSkillsDir, skill);
+      cpSync(join(srcSkillsDir, skill), dest, { recursive: true, force: true });
 
-    const skillFile = join(dest, "SKILL.md");
-    const content = readFileSync(skillFile, "utf-8");
-    writeFileSync(skillFile, content.replace(/<MEMORY_PATH>/g, rawMemPath));
-  }
-  console.log(green("  ✓ Skills installed to ") + kiroSkillsDir + dim(` (memory path: ${rawMemPath})`));
-
-  // 5. Install hooks (always overwrite — hooks are managed, not customized)
-  const hooksDir = expandHome("~/.kiro/memory-hooks");
-  mkdirSync(hooksDir, { recursive: true });
-
-  const srcHooksDir = join(pkgRoot, "hooks");
-  for (const hookFile of readdirSync(srcHooksDir)) {
-    const src = join(srcHooksDir, hookFile);
-    const dest = join(hooksDir, hookFile);
-    const content = readFileSync(src, "utf-8");
-    writeFileSync(dest, content.replace(/<MEMORY_PATH>/g, expandHome(rawMemPath)));
-    chmodSync(dest, 0o755);
-  }
-  console.log(green("  ✓ Hooks installed to ") + hooksDir);
-
-  // 6. Knowledge base index type
-  console.log();
-  console.log(`  Knowledge Base index type:`);
-  console.log(dim(`    1) Fast (Lexical — bm25)`));
-  console.log(dim(`    2) Best (Semantic — all-minilm-l6-v2)`));
-  const indexChoice = (await ask(`  Choose index type ${dim("(1/2, default: 2)")}: `)).trim() || "2";
-  const indexType = indexChoice === "1" ? "fast" : "best";
-
-  const cliSettingsPath = expandHome("~/.kiro/settings/cli.json");
-  let cliSettings = {};
-  if (existsSync(cliSettingsPath)) {
-    cliSettings = JSON.parse(readFileSync(cliSettingsPath, "utf-8"));
-  } else {
-    mkdirSync(dirname(cliSettingsPath), { recursive: true });
-  }
-  cliSettings["knowledge.indexType"] = indexType === "fast" ? "Fast" : "Best";
-  writeFileSync(cliSettingsPath, JSON.stringify(cliSettings, null, 2) + "\n");
-  console.log(green(`  ✓ Index type set to ${indexType}`));
-
-  // 7. Create or merge agent config
-  const agentName = (await ask(`\n  Agent name ${dim("(mnemo)")}: `)).trim() || "mnemo";
-  const agentsDir = expandHome("~/.kiro/agents");
-  mkdirSync(agentsDir, { recursive: true });
-
-  const agentFile = join(agentsDir, `${agentName}.json`);
-  const incoming = buildAgentConfig(agentName, hooksDir, rawMemPath, indexType);
-
-  if (existsSync(agentFile)) {
-    const existing = JSON.parse(readFileSync(agentFile, "utf-8"));
-    const merged = mergeAgentConfig(existing, incoming);
-    writeFileSync(agentFile, JSON.stringify(merged, null, 2) + "\n");
-
-    // Report what was preserved
-    const preserved = [];
-    if (existing.mcpServers && Object.keys(existing.mcpServers).length) preserved.push("MCP servers");
-    if (existing.prompt) preserved.push("custom prompt");
-    if (existing.model) preserved.push("model");
-    const userResources = (existing.resources || []).filter(r => {
-      if (typeof r === "string") return !r.includes("load-memory") && !r.includes("update-memory") && !r.includes("consolidate-memory");
-      if (r && r.type === "knowledgeBase" && r.name === "My Memory") return false;
-      return true;
-    });
-    if (userResources.length) preserved.push(`${userResources.length} custom resource(s)`);
-
-    if (preserved.length) {
-      console.log(green(`  ✓ Agent "${agentName}" updated — preserved: `) + preserved.join(", "));
-    } else {
-      console.log(green(`  ✓ Agent "${agentName}" updated`));
+      const skillFile = join(dest, "SKILL.md");
+      const content = readFileSync(skillFile, "utf-8");
+      writeFileSync(skillFile, content.replace(/<MEMORY_PATH>/g, rawMemPath));
     }
-  } else {
-    writeFileSync(agentFile, JSON.stringify(incoming, null, 2) + "\n");
-    console.log(green(`  ✓ Agent "${agentName}" created at `) + agentFile);
+    console.log(green("  ✓ Kiro skills installed to ") + kiroSkillsDir + dim(` (memory path: ${rawMemPath})`));
+
+    // 5. Install Kiro hooks (always overwrite — hooks are managed, not customized)
+    hooksDir = expandHome("~/.kiro/memory-hooks");
+    mkdirSync(hooksDir, { recursive: true });
+
+    const srcHooksDir = join(pkgRoot, "hooks");
+    const kiroHooks = ["agent-spawn.sh", "stop.sh"];
+    for (const hookFile of kiroHooks) {
+      const src = join(srcHooksDir, hookFile);
+      if (!existsSync(src)) continue;
+      const dest = join(hooksDir, hookFile);
+      const content = readFileSync(src, "utf-8");
+      writeFileSync(dest, content.replace(/<MEMORY_PATH>/g, expandHome(rawMemPath)));
+      chmodSync(dest, 0o755);
+    }
+    console.log(green("  ✓ Kiro hooks installed to ") + hooksDir);
+  }
+
+  // ── CLAUDE CODE INSTALL ──────────────────────────────────────────────────
+  if (installClaude) {
+    // Claude skills
+    const claudeSkillsDir = expandHome("~/.claude/skills");
+    mkdirSync(claudeSkillsDir, { recursive: true });
+
+    const claudeSkills = ["load-memory", "update-memory", "consolidate-memory"];
+    const srcClaudeSkillsDir = join(pkgRoot, "claude-skills");
+
+    for (const skill of claudeSkills) {
+      const dest = join(claudeSkillsDir, skill);
+      cpSync(join(srcClaudeSkillsDir, skill), dest, { recursive: true, force: true });
+      const skillFile = join(dest, "SKILL.md");
+      const content = readFileSync(skillFile, "utf-8");
+      writeFileSync(skillFile, content.replace(/<MEMORY_PATH>/g, rawMemPath));
+    }
+    console.log(green("  ✓ Claude Code skills installed to ") + claudeSkillsDir);
+
+    // Claude hooks
+    const claudeHooksDir = expandHome("~/.claude/hooks");
+    mkdirSync(claudeHooksDir, { recursive: true });
+
+    const srcHooksDir = join(pkgRoot, "hooks");
+    const claudeHookMap = { "session-start.sh": "memory-session-start.sh", "stop.sh": "memory-stop.sh" };
+    for (const [src, dest] of Object.entries(claudeHookMap)) {
+      const srcPath = join(srcHooksDir, src);
+      if (!existsSync(srcPath)) continue;
+      const destPath = join(claudeHooksDir, dest);
+      const content = readFileSync(srcPath, "utf-8");
+      writeFileSync(destPath, content.replace(/<MEMORY_PATH>/g, expandHome(rawMemPath)));
+      chmodSync(destPath, 0o755);
+    }
+    console.log(green("  ✓ Claude Code hooks installed to ") + claudeHooksDir);
+
+    // Merge into ~/.claude/settings.json
+    const claudeSettingsPath = expandHome("~/.claude/settings.json");
+    let settings = {};
+    if (existsSync(claudeSettingsPath)) {
+      settings = JSON.parse(readFileSync(claudeSettingsPath, "utf-8"));
+    }
+    if (!settings.hooks) settings.hooks = {};
+    if (!settings.hooks.SessionStart) settings.hooks.SessionStart = [];
+    if (!settings.hooks.Stop) settings.hooks.Stop = [];
+
+    const claudeHooksDir2 = expandHome("~/.claude/hooks");
+    const sessionStartCmd = `bash "${claudeHooksDir2}/memory-session-start.sh"`;
+    const stopCmd = `bash "${claudeHooksDir2}/memory-stop.sh"`;
+
+    const hasSessionStart = settings.hooks.SessionStart.some(g => g.hooks?.some(h => h.command?.includes("memory-session-start.sh")));
+    const hasStop = settings.hooks.Stop.some(g => g.hooks?.some(h => h.command?.includes("memory-stop.sh")));
+
+    if (!hasSessionStart) settings.hooks.SessionStart.push({ hooks: [{ type: "command", command: sessionStartCmd }] });
+    if (!hasStop) settings.hooks.Stop.push({ hooks: [{ type: "command", command: stopCmd }] });
+
+    writeFileSync(claudeSettingsPath, JSON.stringify(settings, null, 2) + "\n");
+    console.log(green("  ✓ Claude Code hooks wired into ") + claudeSettingsPath);
+  }
+
+  if (!installKiro && !installClaude) {
+    console.log(yellow("  ⚠ No tool selected, skipping tool-specific install."));
+  }
+
+  let indexType = "best";
+  if (installKiro) {
+    // 6. Knowledge base index type
+    console.log();
+    console.log(`  Knowledge Base index type:`);
+    console.log(dim(`    1) Fast (Lexical — bm25)`));
+    console.log(dim(`    2) Best (Semantic — all-minilm-l6-v2)`));
+    const indexChoice = (await ask(`  Choose index type ${dim("(1/2, default: 2)")}: `)).trim() || "2";
+    indexType = indexChoice === "1" ? "fast" : "best";
+
+    const cliSettingsPath = expandHome("~/.kiro/settings/cli.json");
+    let cliSettings = {};
+    if (existsSync(cliSettingsPath)) {
+      cliSettings = JSON.parse(readFileSync(cliSettingsPath, "utf-8"));
+    } else {
+      mkdirSync(dirname(cliSettingsPath), { recursive: true });
+    }
+    cliSettings["knowledge.indexType"] = indexType === "fast" ? "Fast" : "Best";
+    writeFileSync(cliSettingsPath, JSON.stringify(cliSettings, null, 2) + "\n");
+    console.log(green(`  ✓ Index type set to ${indexType}`));
+
+    // 7. Create or merge agent config
+    const agentName = (await ask(`\n  Agent name ${dim("(mnemo)")}: `)).trim() || "mnemo";
+    const agentsDir = expandHome("~/.kiro/agents");
+    mkdirSync(agentsDir, { recursive: true });
+
+    const agentFile = join(agentsDir, `${agentName}.json`);
+    const incoming = buildAgentConfig(agentName, hooksDir, rawMemPath, indexType);
+
+    if (existsSync(agentFile)) {
+      const existing = JSON.parse(readFileSync(agentFile, "utf-8"));
+      const merged = mergeAgentConfig(existing, incoming);
+      writeFileSync(agentFile, JSON.stringify(merged, null, 2) + "\n");
+
+      const preserved = [];
+      if (existing.mcpServers && Object.keys(existing.mcpServers).length) preserved.push("MCP servers");
+      if (existing.prompt) preserved.push("custom prompt");
+      if (existing.model) preserved.push("model");
+      const userResources = (existing.resources || []).filter(r => {
+        if (typeof r === "string") return !r.includes("load-memory") && !r.includes("update-memory") && !r.includes("consolidate-memory");
+        if (r && r.type === "knowledgeBase" && r.name === "My Memory") return false;
+        return true;
+      });
+      if (userResources.length) preserved.push(`${userResources.length} custom resource(s)`);
+
+      if (preserved.length) {
+        console.log(green(`  ✓ Agent "${agentName}" updated — preserved: `) + preserved.join(", "));
+      } else {
+        console.log(green(`  ✓ Agent "${agentName}" updated`));
+      }
+    } else {
+      writeFileSync(agentFile, JSON.stringify(incoming, null, 2) + "\n");
+      console.log(green(`  ✓ Agent "${agentName}" created at `) + agentFile);
+    }
   }
 
   // 8. Done
@@ -289,9 +369,10 @@ async function main() {
     console.log(cyan("  Upgrade complete! Your memory data is untouched."));
     console.log(dim("  Skills, hooks, and agent config have been updated to v" + PKG_VERSION));
   } else {
-    console.log(cyan("  All set! Start chatting:"));
+    console.log(cyan("  All set!"));
   }
-  console.log(dim(`  kiro-cli chat --agent ${agentName} --trust-all-tools`));
+  if (installKiro) console.log(dim(`  Kiro: kiro-cli chat --agent mnemo --trust-all-tools`));
+  if (installClaude) console.log(dim(`  Claude Code: start a new session and ask "who am I"`));
   console.log();
 
   rl.close();
