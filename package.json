@@ -6,7 +6,7 @@
   "author": "",
   "repository": {
     "type": "git",
-    "url": "https://github.com/syedair/kiro-memory"
+    "url": "https://github.com/syedair/ai-memory-skill"
   },
   "bin": {
     "kiro-memory-skill": "./bin/setup.mjs",
