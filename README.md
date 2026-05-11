@@ -1,46 +1,43 @@
-# Kiro Memory Skill
+# AI Memory Skill
 
-A persistent memory system for [Kiro CLI](https://kiro.dev) that lets your AI assistant remember context across sessions — and consolidate it like REM sleep.
-
-## What's New in v2
-
-- **Dream consolidation** — a third skill that prunes stale entries, resolves contradictions, deduplicates, and converts relative dates to absolute. Say "dream" or "consolidate memory" to trigger it.
-- **Agent hooks** — `agentSpawn` auto-loads your recent memory into context and nudges you when consolidation is overdue. `stop` resets session tracking after a dream cycle.
-- **Knowledge base resource** — memory folder is auto-indexed on agent spawn via Kiro's built-in knowledgeBase resource. No manual `/knowledge add` step needed.
+A persistent memory system for AI assistants that remembers context across sessions — and consolidates it like REM sleep. Supports **Kiro** and **Claude Code**.
 
 ## How It Works
 
 Three skills work together:
-- **load-memory** — Retrieves relevant context from your memory when you start a conversation or reference past work
-- **update-memory** — Saves important information from conversations into categorized, linked markdown files
+- **load-memory** — Retrieves relevant context when you start a conversation or reference past work
+- **update-memory** — Saves important information into categorized, linked markdown files
 - **consolidate-memory** — Prunes, deduplicates, and reorganizes memory files (the "dream" cycle)
 
 Two hooks automate the lifecycle:
-- **agentSpawn** — Loads `MEMORY.md` into context on startup, checks if consolidation is overdue
-- **stop** — Resets session counter after consolidation runs
+- **Session start** — Loads `SOUL.md`, `AGENT.md`, `USER.md`, and `MEMORY.md` into context, checks if consolidation is overdue
+- **Stop** — Resets session counter after consolidation runs
 
-All memory is stored as plain markdown files in a folder you control.
+All memory is stored as plain markdown files in a folder you control (`~/Memory` by default).
 
 ## Setup
-
-### Quick Install (recommended)
 
 ```bash
 npx kiro-memory-skill
 ```
 
-This walks you through:
-- Creating the memory folder (default `~/Memory`)
-- Copying template files
-- Installing all three skills to `~/.kiro/skills/`
-- Installing hook scripts to `~/.kiro/memory-hooks/`
-- Configuring the knowledge base index type
-- Creating an agent with hooks and knowledgeBase resource pre-configured
+The installer asks which tool you're setting up for — Kiro, Claude Code, or both — then handles everything automatically:
 
-### Manual Install
+- Creates the memory folder and template files
+- Installs the right skills for your tool
+- Installs and wires up hooks
+- For Kiro: configures knowledge base index and creates an agent
+- For Claude Code: merges hooks into `~/.claude/settings.json`
+
+You can also invoke it as:
+```bash
+npx ai-memory-skill
+```
+
+### Manual Install — Claude Code
 
 <details>
-<summary>Click to expand manual setup steps</summary>
+<summary>Click to expand</summary>
 
 #### 1. Create the memory folder
 
@@ -48,13 +45,74 @@ This walks you through:
 mkdir -p ~/Memory/{People,Knowledge,Decisions,Customers,Personal,Personal/Projects,Reference,Technical,Work,.archive}
 ```
 
-#### 2. Initialize the memory files
+#### 2. Copy template files
 
 ```bash
 cp -r memory-template/* ~/Memory/
 ```
 
-#### 3. Install the skills
+#### 3. Install skills
+
+```bash
+cp -r claude-skills/load-memory ~/.claude/skills/
+cp -r claude-skills/update-memory ~/.claude/skills/
+cp -r claude-skills/consolidate-memory ~/.claude/skills/
+```
+
+Replace `<MEMORY_PATH>` in each `SKILL.md` with your memory path (e.g. `~/Memory`).
+
+#### 4. Install hooks
+
+```bash
+mkdir -p ~/.claude/hooks
+cp hooks/session-start.sh ~/.claude/hooks/memory-session-start.sh
+cp hooks/stop.sh ~/.claude/hooks/memory-stop.sh
+chmod +x ~/.claude/hooks/memory-session-start.sh ~/.claude/hooks/memory-stop.sh
+```
+
+Replace `<MEMORY_PATH>` in both scripts with your expanded memory path (e.g. `/Users/you/Memory`).
+
+#### 5. Wire hooks into Claude Code
+
+Add to `~/.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [{ "type": "command", "command": "bash \"~/.claude/hooks/memory-session-start.sh\"" }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{ "type": "command", "command": "bash \"~/.claude/hooks/memory-stop.sh\"" }]
+      }
+    ]
+  }
+}
+```
+
+</details>
+
+### Manual Install — Kiro
+
+<details>
+<summary>Click to expand</summary>
+
+#### 1. Create the memory folder
+
+```bash
+mkdir -p ~/Memory/{People,Knowledge,Decisions,Customers,Personal,Personal/Projects,Reference,Technical,Work,.archive}
+```
+
+#### 2. Copy template files
+
+```bash
+cp -r memory-template/* ~/Memory/
+```
+
+#### 3. Install skills
 
 ```bash
 cp -r skills/load-memory ~/.kiro/skills/
@@ -62,32 +120,24 @@ cp -r skills/update-memory ~/.kiro/skills/
 cp -r skills/consolidate-memory ~/.kiro/skills/
 ```
 
-#### 4. Update paths
+Replace `<MEMORY_PATH>` in each `SKILL.md` with your memory path.
 
-Edit all three skill files to point to your memory folder — replace `<MEMORY_PATH>` with your path (e.g., `~/Memory`).
-
-#### 5. Install hooks
+#### 4. Install hooks
 
 ```bash
 mkdir -p ~/.kiro/memory-hooks
-cp hooks/*.sh ~/.kiro/memory-hooks/
+cp hooks/agent-spawn.sh hooks/stop.sh ~/.kiro/memory-hooks/
 chmod +x ~/.kiro/memory-hooks/*.sh
 ```
 
-Edit the hook scripts to replace `<MEMORY_PATH>` with your expanded memory path (e.g., `/Users/you/Memory`).
+Replace `<MEMORY_PATH>` in both scripts with your expanded memory path.
 
-#### 6. Create your agent
-
-```bash
-kiro-cli agent create
-```
-
-Use this agent config as a reference:
+#### 5. Create your agent
 
 ```json
 {
   "name": "mnemo",
-  "description": "Kiro Memory — persistent context with dream consolidation",
+  "description": "AI Memory — persistent context with dream consolidation",
   "tools": ["*"],
   "resources": [
     "skill://~/.kiro/skills/load-memory/SKILL.md",
@@ -103,17 +153,13 @@ Use this agent config as a reference:
     }
   ],
   "hooks": {
-    "agentSpawn": [
-      { "command": "bash ~/.kiro/memory-hooks/agent-spawn.sh" }
-    ],
-    "stop": [
-      { "command": "bash ~/.kiro/memory-hooks/stop.sh" }
-    ]
+    "agentSpawn": [{ "command": "bash ~/.kiro/memory-hooks/agent-spawn.sh" }],
+    "stop": [{ "command": "bash ~/.kiro/memory-hooks/stop.sh" }]
   }
 }
 ```
 
-#### 7. Start chatting
+#### 6. Start chatting
 
 ```bash
 kiro-cli chat --agent mnemo --trust-all-tools
@@ -125,12 +171,12 @@ kiro-cli chat --agent mnemo --trust-all-tools
 
 ```
 ~/Memory/
-├── README.md              # Index of all files
 ├── SOUL.md                # Agent's core identity, purpose, and principles
 ├── AGENT.md               # Agent's behavioral rules and communication style
 ├── MEMORY.md              # Rolling context log — recent activity, active threads
-├── USER.md                # Your profile, preferences, role
+├── USER.md                # Your profile, preferences, role, timezone
 ├── notes.md               # Raw notes drop zone (processed by update-memory)
+├── README.md              # Index of all files
 ├── .last-dream            # Timestamp of last consolidation (managed by hooks)
 ├── .session-count         # Session counter (managed by hooks)
 ├── Personal/              # Life, interests, goals, habits
@@ -140,7 +186,6 @@ kiro-cli chat --agent mnemo --trust-all-tools
 ├── Decisions/             # Decision log with rationale
 ├── Customers/             # One subdirectory per customer company
 │   └── <Company>/         #   README.md = company overview, plus engagement files
-├── Personal/              # Life, interests, goals, habits
 ├── Reference/             # Links, articles, bookmarks, resources
 ├── Technical/             # Code snippets, configs, architecture notes
 ├── Work/                  # Meetings, processes, team dynamics, org context
@@ -151,16 +196,18 @@ kiro-cli chat --agent mnemo --trust-all-tools
 
 ### Saving to memory
 
-Just say:
+Say:
 - "remember this"
 - "update memory"
 - "save to memory"
 
-Or share important context — the skill triggers automatically when it detects decisions, project details, or reference material worth persisting.
+Or share important context — the skill triggers automatically when it detects decisions, project details, or preferences worth persisting.
 
 ### Loading from memory
 
-Happens automatically via the `agentSpawn` hook (loads `MEMORY.md` into context) and the `load-memory` skill (semantic search for deeper context).
+Happens automatically via the session-start hook (loads core files into context) and the `load-memory` skill (keyword search for deeper context).
+
+For Claude Code, ask "who am I" or "what have I been working on" to verify context is loading correctly.
 
 ### Dream consolidation
 
@@ -169,16 +216,16 @@ Say:
 - "consolidate memory"
 - "clean up memory"
 
-The agent will also nudge you when consolidation is overdue (3+ days and 5+ sessions since last dream).
+The hook will also nudge you when consolidation is overdue (3+ days and 5+ sessions since last dream).
 
 The consolidation skill:
 1. Reads all memory files
-2. Prunes stale entries
-3. Resolves contradictions (newer wins)
-4. Converts relative dates → absolute
+2. Prunes stale entries (preserves them in category folders first)
+3. Resolves contradictions (newer wins, old entries annotated)
+4. Converts relative dates to absolute
 5. Deduplicates across files
-6. Enforces a 200-line cap on MEMORY.md
-7. Re-indexes the knowledge base
+6. Archives MEMORY.md entries older than 30 days
+7. Updates the dream timestamp and resets the session counter
 
 ### Raw notes workflow
 
@@ -188,22 +235,21 @@ The consolidation skill:
 4. Original notes archived to `.archive/YYYY-MM-DD-notes.md`
 5. `notes.md` reset to empty template
 
+## Search
+
+**Kiro** uses semantic search via the built-in knowledge base (configurable as Fast/Lexical or Best/Semantic during setup).
+
+**Claude Code** uses keyword-based grep search across memory files. For semantic search, you can add a vector store MCP server to `~/.claude/settings.json`.
+
 ## Customization
-
-### Adding categories
-
-Create new subdirectories in your memory folder and add them to the categorization table in `update-memory/SKILL.md`.
-
-### Changing the memory path
-
-Update the path in all three `SKILL.md` files and both hook scripts, then re-index:
-```
-/knowledge update --name "My Memory" --value "/your/new/path"
-```
 
 ### Adjusting consolidation thresholds
 
-Edit `~/.kiro/memory-hooks/agent-spawn.sh` — change the `3` (days) and `5` (sessions) thresholds to your preference.
+Edit the session-start hook script — change the `3` (days) and `5` (sessions) thresholds to your preference.
+
+### Changing the memory path
+
+Re-run the installer (`npx kiro-memory-skill`) — it detects existing installs and updates paths without overwriting your data.
 
 ## License
 
